@@ -1,46 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="HistogramView">
-        
-        <attr name="y_distance" format="dimension"/>
-        <attr name="x_distance" format="dimension"/>
+
         <attr name="center_X" format="dimension"/>
         <attr name="center_y" format="dimension"/>
-
-<!--        &lt;!&ndash;左边的柱状图的颜色&ndash;&gt;-->
-<!--        <attr name="chatview_left_background_color" format="color" />-->
-<!--        &lt;!&ndash;右边的柱状图的颜色&ndash;&gt;-->
-<!--        <attr name="chatview_right_background_color" format="color" />-->
-
-<!--        &lt;!&ndash;字体（左数据）的颜色&ndash;&gt;-->
-<!--        <attr name="chatview_left_text_data_color" format="color" />-->
-<!--        &lt;!&ndash;字体（右数据）的颜色&ndash;&gt;-->
-<!--        <attr name="chatview_right_text_data_color" format="color" />-->
-<!--        &lt;!&ndash;字体（数据）的大小&ndash;&gt;-->
-<!--        <attr name="chatview_text_data_size" format="dimension" />-->
-
-<!--        &lt;!&ndash;（xy轴）的颜色&ndash;&gt;-->
-<!--        <attr name="chatview_text_xy_color" format="color" />-->
-<!--        &lt;!&ndash;（xy轴）的字体大小&ndash;&gt;-->
-<!--        <attr name="chatview_text_xy_size" format="dimension" />-->
-
-<!--        &lt;!&ndash;左右柱状图之间的小距离&ndash;&gt;-->
-<!--        <attr name="chatview_line_small_distance" format="dimension" />-->
-<!--        &lt;!&ndash;柱状图的宽度&ndash;&gt;-->
-<!--        <attr name="chatview_line_width" format="dimension" />-->
-<!--        &lt;!&ndash;柱状图之间的大距离&ndash;&gt;-->
-<!--        <attr name="chatview_line_big_distance" format="dimension" />-->
-<!--        &lt;!&ndash;Y轴数据的宽度，当数据字符串过大的时候需要调整这个宽度&ndash;&gt;-->
-<!--        <attr name="chatview_y_distance" format="dimension" />-->
-<!--        &lt;!&ndash;X轴数据的宽度&ndash;&gt;-->
-<!--        <attr name="chatview_x_distance" format="dimension" />-->
-
-<!--        &lt;!&ndash;动画时长&ndash;&gt;-->
-<!--        <attr name="chatview_animation_duration" format="integer" />-->
-<!--        &lt;!&ndash;是否显示坐标轴的箭头&ndash;&gt;-->
-<!--        <attr name="chatview_show_arrow" format="boolean" />-->
-<!--        &lt;!&ndash;是否显示Y坐标轴的间断标记&ndash;&gt;-->
-<!--        <attr name="chatview_show_y_interval" format="boolean" />-->
 
     </declare-styleable>
 </resources>
