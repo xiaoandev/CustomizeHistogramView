@@ -16,9 +16,10 @@ import com.example.customizehistogramview.R;
 import com.example.customizehistogramview.bean.DataPoint;
 
 import java.util.ArrayList;
+import java.util.IllegalFormatCodePointException;
 import java.util.List;
 
-public class HistogramView extends View {
+public class PolyLineView extends View {
 
     private static final String TAG = HistogramView.class.getSimpleName();
     /**
@@ -28,27 +29,27 @@ public class HistogramView extends View {
     /**
      * 坐标轴原点 X 的默认值
      */
-    private final static float DEFAULT_CENTER_X = 100;
+    private final static float DEFAULT_CENTER_X = 200;
     /**
      * 坐标轴原点 Y 的默认值
      */
-    private final static float DEFAULT_CENTER_Y = 300;
+    private final static float DEFAULT_CENTER_Y = 500;
     /**
      * 柱状图默认颜色
      */
     private final static int DEFAULT_LINE_COLOR = Color.GREEN;
     /**
-     * 柱状图默认宽度
+     * 折线图默认宽度
      */
-    private final static int DEFAULT_LINE_WIDTH = 30;
+    private final static int DEFAULT_LINE_WIDTH = 2;
     /**
      * X 轴两刻度之间距离的默认值
      */
-    private final static float DEFAULT_INTERVAL_DATA_X = DEFAULT_LINE_WIDTH + 10;
+    private final static float DEFAULT_INTERVAL_DATA_X = 60;
     /**
      * Y 轴两刻度之间距离的默认值
      */
-    private final static float DEFAULT_INTERVAL_DATA_Y = 40;
+    private final static float DEFAULT_INTERVAL_DATA_Y = 60;
     /**
      * XY轴画笔的默认颜色
      */
@@ -106,9 +107,13 @@ public class HistogramView extends View {
      */
     private float mLineXYSize;
     /**
-     * 柱状图画笔
+     * 折线图画笔
      */
     private Paint mPaintLineData;
+    /**
+     * 圆点画笔
+     */
+    private Paint mPointPaint;
     /**
      * 柱状图宽度
      */
@@ -128,11 +133,11 @@ public class HistogramView extends View {
     /**
      * X轴每个刻度之间的距离
      */
-    private float mIntervalDataX = 40;
+    private float mIntervalDataX;
     /**
      * Y轴每个刻度之间的距离
      */
-    private float mIntervalDataY = 40;
+    private float mIntervalDataY;
     /**
      * X 轴的单位长度
      */
@@ -150,13 +155,9 @@ public class HistogramView extends View {
      */
     private int mValueMinusY = 10;
     /**
-     * 顶部柱状图数据
+     * 折线图数据
      */
-    private List<DataPoint> mTopLineData;
-    /**
-     * 底部柱状图数据
-     */
-    private List<DataPoint> mBottomLineData;
+    private List<DataPoint> mLineData;
     /**
      * Y轴大刻度线宽度
      */
@@ -205,18 +206,46 @@ public class HistogramView extends View {
      * 设置平均线的显示方式：1、实线；2、虚线。
      */
     private boolean isShowDottedLine = true;
+    /**
+     * 圆点画笔颜色
+     */
+    private int mPointColor = Color.BLACK;
+    /**
+     * 圆点画笔宽度
+     */
+    private float mPointWidth = 6;
+    /**
+     * 圆点半径
+     */
+    private float mPointRadius = 3;
+    /**
+     * 网格线颜色
+     */
+    private int mGridLineColor = Color.GRAY;
+    /**
+     * 网格线宽度
+     */
+    private float mGridLineWidth = 1;
+    /**
+     * 判断是否显示网格线
+     */
+    private boolean isShowGridLine = true;
+    /**
+     * 判断是否绘制Y轴的小刻度线
+     */
+    private boolean isDrawSmallTick = true;
 
-    public HistogramView(Context context) {
+    public PolyLineView(Context context) {
         super(context);
         init();
     }
 
-    public HistogramView(Context context, @Nullable AttributeSet attrs) {
+    public PolyLineView(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
         init();
     }
 
-    public HistogramView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public PolyLineView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         mContext = context;
         TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.HistogramView);
@@ -234,6 +263,7 @@ public class HistogramView extends View {
         init();
     }
 
+
     /**
      * 初始画笔和数值
      */
@@ -241,16 +271,19 @@ public class HistogramView extends View {
 
         this.mDataTextX = new ArrayList<>();
         this.mDataTextY = new ArrayList<>();
-        this.mTopLineData = new ArrayList<>();
-        this.mBottomLineData = new ArrayList<>();
+        this.mLineData = new ArrayList<>();
 
         //XY轴
         mPaintTextXY = new Paint();
-        mPaintTextXY.setAntiAlias(true);
+        mPaintTextXY.setAntiAlias(true);//抗锯齿
 
-        //柱状图
+        //折线图
         mPaintLineData = new Paint();
         mPaintLineData.setAntiAlias(true);
+
+        //圆点
+        mPointPaint = new Paint();
+        mPointPaint.setAntiAlias(true);
     }
 
     @Override
@@ -262,9 +295,10 @@ public class HistogramView extends View {
             //绘制Y坐标值
             drawDataLineY(canvas);
         }
+
         //判断是否根据录入的数据设置坐标轴长度
         if (mIsAutoSetAxis) {
-            mLengthX = mIntervalDataX * mDataTextX.size() + mLineWidth * 2;
+            mLengthX = mIntervalDataX * mDataTextX.size();
             mLengthY = mIntervalDataY * mDataTextY.size();
         }
         Log.d(TAG, "Length of X----" + mLengthX);
@@ -274,12 +308,12 @@ public class HistogramView extends View {
 
         mScaleX = mIntervalDataX / mValueMinusX;
         mScaleY = mIntervalDataY / mValueMinusY;
-        if (mTopLineData != null)
-            drawTopLineData(canvas);//绘制顶部柱状图
-        if (mBottomLineData != null)
-            drawBottomLineData(canvas);//绘制底部柱状图
-
+        if (mLineData != null)
+            drawLineData(canvas);//绘制折线图
         drawAverageValueLine(canvas);
+        if (isShowGridLine)
+            drawGridLine(canvas);
+
     }
 
     /**
@@ -290,63 +324,58 @@ public class HistogramView extends View {
         mPaintTextXY.setStrokeWidth(mLineXYSize);
         mPaintTextXY.setColor(mLineXYColor);
         canvas.drawLine(mCenterX, mCenterY, mCenterX + mLengthX, mCenterY, mPaintTextXY);
-        canvas.drawLine(mCenterX, mCenterY + textHeightX + 2 * marginDataX,
-                mCenterX + mLengthX, mCenterY + textHeightX + 2 * marginDataX, mPaintTextXY);
         canvas.drawLine(mCenterX, mCenterY, mCenterX, mCenterY - mLengthY, mPaintTextXY);
-        canvas.drawLine(mCenterX, mCenterY, mCenterX, mCenterY + mLengthY + textHeightX + 2 * marginDataX, mPaintTextXY);
     }
 
     /**
-     * 绘制柱状图数据平均线
+     * 绘制网格线
+     * @param canvas
+     */
+    private void drawGridLine(Canvas canvas) {
+        mPaintTextXY.setStrokeWidth(mGridLineWidth);
+        mPaintTextXY.setColor(mGridLineColor);
+        mPaintTextXY.setPathEffect(new DashPathEffect(new float[]{0, 0}, 0));
+        for (int i = 1; i <= mDataTextX.size(); i++)
+            canvas.drawLine(mCenterX + i * mIntervalDataX, mCenterY, mCenterX + i * mIntervalDataX, mCenterY - mLengthY, mPaintTextXY);
+        for (int j = 1; j <= mDataTextX.size(); j++)
+            canvas.drawLine(mCenterX, mCenterY - j * mIntervalDataY, mCenterX + mLengthX, mCenterY - j * mIntervalDataY, mPaintTextXY);
+    }
+
+    /**
+     * 绘制折线图数据平均线
      * @param canvas
      */
     private void drawAverageValueLine(Canvas canvas) {
         mPaintTextXY.setStrokeWidth(mAverageValueSize);
         mPaintTextXY.setColor(mAverageValueColor);
-        float stopLineX, startLineX, startTopLineY, stopTopLineY, startBottomLineY, stopBottomLineY;
+        float stopLineX, startLineX, startLineY, stopLineY;
         startLineX = mCenterX;
         stopLineX = startLineX + mLengthX;
-        startTopLineY = stopTopLineY = mCenterY - getTopAverageValue() * mScaleY;
-        startBottomLineY = stopBottomLineY = mCenterY + textHeightX + 2 * marginDataX + getBottomAverageValue() * mScaleY;
+        startLineY = stopLineY = mCenterY - getLineAverageValue() * mScaleY;
         if (isShowDottedLine)
             mPaintTextXY.setPathEffect(new DashPathEffect(new float[]{mDottedLineWidth, mDottedLineWidth}, 0));
-        canvas.drawLine(startLineX, startTopLineY, stopLineX, stopTopLineY, mPaintTextXY);
-        canvas.drawLine(startLineX, startBottomLineY, stopLineX, stopBottomLineY, mPaintTextXY);
+        canvas.drawLine(startLineX, startLineY, stopLineX, stopLineY, mPaintTextXY);
     }
 
     /**
-     * 绘制顶部柱状图
+     * 绘制折线图
      * @param canvas
      */
-    private void drawTopLineData(Canvas canvas) {
+    private void drawLineData(Canvas canvas) {
         mPaintLineData.setColor(mTopLineDataColor);
         mPaintLineData.setStrokeWidth(mLineWidth);
-        float startLineX, stopLineX, stopLineY;
-        float startLineY = mCenterY;
-        for (int i = 1; i <= mDataTextX.size(); i++) {
-            startLineX = mCenterX + i * mIntervalDataX;
-            stopLineX = startLineX;
-            stopLineY = startLineY - mTopLineData.get(i-1).getDataY() * mScaleY;
-            Log.d("stopLineY", i + "--" + stopLineY);
-            canvas.drawLine(startLineX, startLineY, stopLineX, stopLineY, mPaintLineData);
-        }
-    }
-
-    /**
-     * 绘制底部柱状图
-     * @param canvas
-     */
-    private void drawBottomLineData(Canvas canvas) {
-        mPaintLineData.setColor(mBottomLineDataColor);
-        mPaintLineData.setStrokeWidth(mLineWidth);
-        float startLineX, stopLineX, stopLineY;
-        float startLineY = mCenterY + textHeightX + 2 * marginDataX;
-        for (int i = 1; i <= mDataTextX.size(); i++) {
-            startLineX = mCenterX + i * mIntervalDataX;
-            stopLineX = startLineX;
-            stopLineY = startLineY + mBottomLineData.get(i-1).getDataY() * mScaleY;
-            Log.d("stopLineY", i + "--" + stopLineY);
-            canvas.drawLine(startLineX, startLineY, stopLineX, stopLineY, mPaintLineData);
+        mPointPaint.setColor(mPointColor);
+        mPointPaint.setStrokeWidth(mPointWidth);
+        float startPointX, startPointY, stopPointX, stopPointY;
+        for (int i = 1; i < mDataTextX.size(); i++) {
+            startPointX = mCenterX + i * mIntervalDataX;
+            startPointY = mCenterY - mLineData.get(i-1).getDataY() * mScaleY;
+            stopPointX = mCenterX + (i+1) * mIntervalDataX;
+            stopPointY = mCenterY - mLineData.get(i).getDataY() * mScaleY;
+            canvas.drawLine(startPointX, startPointY, stopPointX, stopPointY, mPaintLineData);
+            canvas.drawCircle(startPointX, startPointY, mPointRadius, mPointPaint);
+            if ((i+1) == mDataTextX.size())
+                canvas.drawCircle(stopPointX, stopPointY, mPointRadius, mPointPaint);
         }
     }
 
@@ -380,25 +409,21 @@ public class HistogramView extends View {
         mPaintTextXY.setColor(mTextColorY);
         mPaintTextXY.setTextSize(mTextSizeY);
         mPaintTextXY.setTextAlign(Paint.Align.CENTER);
-        float startTopTextY, startBottomTextY, startTopTickY, startBottomTickY;
-        float startTopTextX = mCenterX - marginDataY;
-        float startBottomTextX = mCenterX - marginDataY;
+        float startTextY, startTickY;
+        float startTextX = mCenterX - marginDataY;
         for (int i = 1; i <= mDataTextY.size(); i++) {
             //绘制进度数字
             String text = mDataTextY.get(i-1);
-            startTopTextY = mCenterY - i * mIntervalDataY;
-            startBottomTextY = mCenterY + i * mIntervalDataY + textHeightX + 2 * marginDataX;
-            canvas.drawText(text, startTopTextX, startTopTextY + textHeightX / 2, mPaintTextXY);
-            canvas.drawText(text, startBottomTextX, startBottomTextY, mPaintTextXY);
+            startTextY = mCenterY - i * mIntervalDataY;
+            canvas.drawText(text, startTextX, startTextY + textHeightX / 2, mPaintTextXY);
             //绘制大刻度线
-            canvas.drawLine(mCenterX, startTopTextY, mCenterX - mBigTickMarkWidth, startTopTextY, mPaintTextXY);
-            canvas.drawLine(mCenterX, startBottomTextY, mCenterX - mBigTickMarkWidth, startBottomTextY, mPaintTextXY);
-            for (int j = 1; j < mBigPartNum; j++) {
-                startTopTickY = mCenterY - (i-1) * mIntervalDataY - j * (mIntervalDataY / mBigPartNum);
-                startBottomTickY = mCenterY + (i-1) * mIntervalDataY + textHeightX + 2 * marginDataX + j * (mIntervalDataY / mBigPartNum);
-                //绘制小刻度线
-                canvas.drawLine(mCenterX, startTopTickY, mCenterX - mSmallTickMarkWidth, startTopTickY, mPaintTextXY);
-                canvas.drawLine(mCenterX, startBottomTickY, mCenterX - mSmallTickMarkWidth, startBottomTickY, mPaintTextXY);
+            canvas.drawLine(mCenterX, startTextY, mCenterX - mBigTickMarkWidth, startTextY, mPaintTextXY);
+            if (isDrawSmallTick) {
+                for (int j = 1; j < mBigPartNum; j++) {
+                    startTickY = mCenterY - (i-1) * mIntervalDataY - j * (mIntervalDataY / mBigPartNum);
+                    //绘制小刻度线
+                    canvas.drawLine(mCenterX, startTickY, mCenterX - mSmallTickMarkWidth, startTickY, mPaintTextXY);
+                }
             }
         }
     }
@@ -444,11 +469,11 @@ public class HistogramView extends View {
      * 设置顶部柱状图的数据
      * @param topLineData
      */
-    public void setTopLineData(List<DataPoint> topLineData) {
+    public void setLineData(List<DataPoint> topLineData) {
         if (topLineData == null)
             return;
-        this.mTopLineData.clear();
-        this.mTopLineData = topLineData;
+        this.mLineData.clear();
+        this.mLineData = topLineData;
         invalidate(); //请求重新draw
     }
 
@@ -456,42 +481,14 @@ public class HistogramView extends View {
      * 获取顶部柱状图数据的平均值
      * @return
      */
-    public float getTopAverageValue() {
+    public float getLineAverageValue() {
         float averageValue = 0;
-        if (mTopLineData != null) {
-            for (int i = 0; i < mTopLineData.size(); i++)
-                averageValue += mTopLineData.get(i).getDataY();
-            Log.d(TAG, "Top Data Sum----" + averageValue);
-            averageValue = averageValue / mTopLineData.size();
-            Log.d(TAG, "Top averageValue----" + averageValue);
-        }
-        return averageValue;
-    }
-
-    /**
-     * 设置底部柱状图的数据
-     * @param topBottomData
-     */
-    public void setBottomLineData(List<DataPoint> topBottomData) {
-        if (topBottomData == null)
-            return;
-        this.mBottomLineData.clear();
-        this.mBottomLineData = topBottomData;
-        invalidate(); //请求重新draw
-    }
-
-    /**
-     * 获取底部柱状图数据的平均值
-     * @return
-     */
-    public float getBottomAverageValue() {
-        float averageValue = 0;
-        if (mBottomLineData != null) {
-            for (int i = 0; i < mBottomLineData.size(); i++)
-                averageValue += mBottomLineData.get(i).getDataY();
-            Log.d(TAG, "Bottom Data Sum----" + averageValue);
-            averageValue = averageValue / mBottomLineData.size();
-            Log.d(TAG, "Bottom averageValue----" + averageValue);
+        if (mLineData != null) {
+            for (int i = 0; i < mLineData.size(); i++)
+                averageValue += mLineData.get(i).getDataY();
+            Log.d(TAG, "Line Data Sum----" + averageValue);
+            averageValue = averageValue / mLineData.size();
+            Log.d(TAG, "Line averageValue----" + averageValue);
         }
         return averageValue;
     }
@@ -552,14 +549,6 @@ public class HistogramView extends View {
     public void setAxisValue(float lengthX, float lengthY) {
         mLengthX = lengthX;
         mLengthY = lengthY;
-    }
-
-    /**
-     * 设置底部柱状图的颜色
-     * @param mBottomLineDataColor
-     */
-    public void setBottomLineDataColor(int mBottomLineDataColor) {
-        this.mBottomLineDataColor = mBottomLineDataColor;
     }
 
     /**
@@ -722,5 +711,74 @@ public class HistogramView extends View {
      */
     public void setShowDottedLine(boolean showDottedLine) {
         isShowDottedLine = showDottedLine;
+    }
+
+    /**
+     * 设置圆点画笔颜色
+     * @param mPointColor
+     */
+    public void setPointColor(int mPointColor) {
+        this.mPointColor = mPointColor;
+    }
+
+    /**
+     * 设置圆点画笔宽度
+     * @param mPointWidth
+     */
+    public void setPointWidth(float mPointWidth) {
+        this.mPointWidth = mPointWidth;
+    }
+
+    /**
+     * 设置圆点半径
+     * @param mPointRadius
+     */
+    public void setPointRadius(float mPointRadius) {
+        this.mPointRadius = mPointRadius;
+    }
+
+    /**
+     * 设置网格线颜色
+     * @param mGridLineColor
+     */
+    public void setGridLineColor(int mGridLineColor) {
+        this.mGridLineColor = mGridLineColor;
+    }
+
+    /**
+     * 设置网格线宽度
+     * @param mGridLineWidth
+     */
+    public void setGridLineWidth(float mGridLineWidth) {
+        this.mGridLineWidth = mGridLineWidth;
+    }
+
+    /**
+     * 判断是否绘制网格线
+     * @param showGridLine
+     */
+    public void setShowGridLine(boolean showGridLine) {
+        isShowGridLine = showGridLine;
+    }
+
+    /**
+     * 判断是否绘制Y轴的小刻度线
+     * @param drawSmallTick
+     */
+    public void setDrawSmallTick(boolean drawSmallTick) {
+        isDrawSmallTick = drawSmallTick;
+    }
+
+    /**
+     * 判断是否清楚图表数据
+     * @param isClear
+     */
+    public void clearChart(boolean isClear) {
+        if (isClear) {
+            mLineData.clear();
+            mLineData = null;
+        }
+        Log.d(TAG, "mLineData---" + mLineData);
+        invalidate();
     }
 }

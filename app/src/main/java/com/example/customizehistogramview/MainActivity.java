@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.graphics.Color;
 import android.os.Bundle;
 
-import com.example.customizehistogramview.bean.Histogram;
+import com.example.customizehistogramview.bean.DataPoint;
 import com.example.customizehistogramview.view.HistogramView;
 
 import java.util.ArrayList;
@@ -14,8 +14,8 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private HistogramView histogramView;
-    private List<Histogram> topLineData;
-    private List<Histogram> bottomLineData;
+    private List<DataPoint> topLineData;
+    private List<DataPoint> bottomLineData;
     private List<String> dataTextX;
     private List<String> dataTextY;
     @Override
@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        histogramView = (HistogramView) findViewById(R.id.line_chat_one);
+        histogramView = (HistogramView) findViewById(R.id.histogram_view);
         initData();
 
     }
@@ -52,20 +52,20 @@ public class MainActivity extends AppCompatActivity {
         histogramView.setLineXYColor(Color.RED);
 
         topLineData = new ArrayList<>();
-        topLineData.add(new Histogram(1, 10));
-        topLineData.add(new Histogram(2, 50));
-        topLineData.add(new Histogram(3, 35));
-        topLineData.add(new Histogram(4, 25));
-        topLineData.add(new Histogram(5, 0));
-        topLineData.add(new Histogram(6, 60));
+        topLineData.add(new DataPoint(1, 10));
+        topLineData.add(new DataPoint(2, 50));
+        topLineData.add(new DataPoint(3, 35));
+        topLineData.add(new DataPoint(4, 25));
+        topLineData.add(new DataPoint(5, 0));
+        topLineData.add(new DataPoint(6, 60));
         histogramView.setTopLineData(topLineData);
         bottomLineData = new ArrayList<>();
-        bottomLineData.add(new Histogram(1, 20));
-        bottomLineData.add(new Histogram(2, 60));
-        bottomLineData.add(new Histogram(3, 45));
-        bottomLineData.add(new Histogram(4, 35));
-        bottomLineData.add(new Histogram(5, 10));
-        bottomLineData.add(new Histogram(6, 70));
+        bottomLineData.add(new DataPoint(1, 20));
+        bottomLineData.add(new DataPoint(2, 60));
+        bottomLineData.add(new DataPoint(3, 45));
+        bottomLineData.add(new DataPoint(4, 35));
+        bottomLineData.add(new DataPoint(5, 10));
+        bottomLineData.add(new DataPoint(6, 70));
         histogramView.setBottomLineData(bottomLineData);
     }
 }

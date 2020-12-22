@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,10 +7,10 @@
 
 
     <com.example.customizehistogramview.view.HistogramView
-        android:id="@+id/line_chat_one"
+        android:id="@+id/histogram_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         tools:ignore="MissingConstraints" />
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

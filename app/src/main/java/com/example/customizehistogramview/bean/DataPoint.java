@@ -1,11 +1,11 @@
 package com.example.customizehistogramview.bean;
 
-public class Histogram {
+public class DataPoint {
 
     private float dataX;
     private float dataY;
 
-    public Histogram(float dataX, float dataY) {
+    public DataPoint(float dataX, float dataY) {
         this.dataX = dataX;
         this.dataY = dataY;
     }
