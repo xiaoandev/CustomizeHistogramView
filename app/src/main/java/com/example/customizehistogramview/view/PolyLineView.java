@@ -770,14 +770,12 @@ public class PolyLineView extends View {
     }
 
     /**
-     * 判断是否清楚图表数据
+     * 判断是否清除图表数据
      * @param isClear
      */
     public void clearChart(boolean isClear) {
-        if (isClear) {
-            mLineData.clear();
+        if (isClear)
             mLineData = null;
-        }
         Log.d(TAG, "mLineData---" + mLineData);
         invalidate();
     }
