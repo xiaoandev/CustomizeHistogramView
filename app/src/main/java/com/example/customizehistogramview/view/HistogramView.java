@@ -221,7 +221,7 @@ public class HistogramView extends View {
         mContext = context;
         TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.HistogramView);
         //柱状图的宽度
-        mCenterX = array.getDimension(R.styleable.HistogramView_center_X, dip2px(mContext, DEFAULT_CENTER_X));
+        mCenterX = array.getDimension(R.styleable.HistogramView_center_x, dip2px(mContext, DEFAULT_CENTER_X));
         mCenterY = array.getDimension(R.styleable.HistogramView_center_y, dip2px(mContext, DEFAULT_CENTER_Y));
         mTopLineDataColor = array.getInteger(R.styleable.HistogramView_topLineDataColor, DEFAULT_LINE_COLOR);
         mBottomLineDataColor = array.getInteger(R.styleable.HistogramView_bottomLineDataColor, DEFAULT_LINE_COLOR);

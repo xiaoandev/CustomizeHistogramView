@@ -2,10 +2,11 @@
 <resources>
     <declare-styleable name="HistogramView">
 
-        <attr name="center_X" format="dimension"/>
+        <attr name="center_x" format="dimension"/>
         <attr name="center_y" format="dimension"/>
         <attr name="bottomLineDataColor" format="integer"/>
         <attr name="topLineDataColor" format="integer"/>
+        <attr name="lineDataColor" format="integer"/>
         <attr name="lineXYColor" format="integer"/>
         <attr name="intervalDataX" format="float"/>
         <attr name="intervalDataY" format="float"/>
@@ -13,4 +14,5 @@
         <attr name="lineXYSize" format="float"/>
 
     </declare-styleable>
+
 </resources>

@@ -57,18 +57,21 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
         //使用方式二绘制坐标轴刻度
         polyLineView.setDigitalAxisData(1, 6, 10, 6);
 
-        polyLineView.setTopLineDataColor(Color.RED);
+        polyLineView.setLineDataColor(Color.RED);
 //        polyLineView.setOriginAxis(400, 300);
         polyLineView.setLineXYColor(Color.RED);
         polyLineView.setDrawSmallTick(false);
+        polyLineView.setPointColor(Color.RED);
+        polyLineView.setPointWidth(1);
+        polyLineView.setPointRadius(5);
 
         lineData = new ArrayList<>();
-        lineData.add(new DataPoint(1, 10));
-        lineData.add(new DataPoint(2, 50));
+        lineData.add(new DataPoint(2, 10));
+        lineData.add(new DataPoint(1, 50));
         lineData.add(new DataPoint(3, 35));
         lineData.add(new DataPoint(4, 25));
         lineData.add(new DataPoint(5, 10));
-        lineData.add(new DataPoint(6, 60));
+//        lineData.add(new DataPoint(6, 60));
         polyLineView.setLineData(lineData);
     }
 

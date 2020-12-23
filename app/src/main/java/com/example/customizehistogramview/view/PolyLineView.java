@@ -16,7 +16,6 @@ import com.example.customizehistogramview.R;
 import com.example.customizehistogramview.bean.DataPoint;
 
 import java.util.ArrayList;
-import java.util.IllegalFormatCodePointException;
 import java.util.List;
 
 public class PolyLineView extends View {
@@ -115,17 +114,13 @@ public class PolyLineView extends View {
      */
     private Paint mPointPaint;
     /**
-     * 柱状图宽度
+     * 折线图宽度
      */
     private float mLineWidth;
     /**
-     * 顶部柱状图的颜色
+     * 折线图的颜色
      */
-    private int mBottomLineDataColor;
-    /**
-     * 底部柱状图的颜色
-     */
-    private int mTopLineDataColor;
+    private int mLineDataColor;
     /**
      * 坐标原点处的值
      */
@@ -249,11 +244,9 @@ public class PolyLineView extends View {
         super(context, attrs, defStyleAttr);
         mContext = context;
         TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.HistogramView);
-        //柱状图的宽度
-        mCenterX = array.getDimension(R.styleable.HistogramView_center_X, dip2px(mContext, DEFAULT_CENTER_X));
+        mCenterX = array.getDimension(R.styleable.HistogramView_center_x, dip2px(mContext, DEFAULT_CENTER_X));
         mCenterY = array.getDimension(R.styleable.HistogramView_center_y, dip2px(mContext, DEFAULT_CENTER_Y));
-        mTopLineDataColor = array.getInteger(R.styleable.HistogramView_topLineDataColor, DEFAULT_LINE_COLOR);
-        mBottomLineDataColor = array.getInteger(R.styleable.HistogramView_bottomLineDataColor, DEFAULT_LINE_COLOR);
+        mLineDataColor = array.getInteger(R.styleable.HistogramView_lineDataColor, DEFAULT_LINE_COLOR);
         mIntervalDataX = array.getFloat(R.styleable.HistogramView_intervalDataX, DEFAULT_INTERVAL_DATA_X);
         mIntervalDataY = array.getFloat(R.styleable.HistogramView_intervalDataY, DEFAULT_INTERVAL_DATA_Y);
         mLineWidth = array.getFloat(R.styleable.HistogramView_lineWidth, DEFAULT_LINE_WIDTH);
@@ -362,19 +355,19 @@ public class PolyLineView extends View {
      * @param canvas
      */
     private void drawLineData(Canvas canvas) {
-        mPaintLineData.setColor(mTopLineDataColor);
+        mPaintLineData.setColor(mLineDataColor);
         mPaintLineData.setStrokeWidth(mLineWidth);
         mPointPaint.setColor(mPointColor);
         mPointPaint.setStrokeWidth(mPointWidth);
         float startPointX, startPointY, stopPointX, stopPointY;
-        for (int i = 1; i < mDataTextX.size(); i++) {
+        for (int i = 1; i < mLineData.size(); i++) {
             startPointX = mCenterX + i * mIntervalDataX;
             startPointY = mCenterY - mLineData.get(i-1).getDataY() * mScaleY;
             stopPointX = mCenterX + (i+1) * mIntervalDataX;
             stopPointY = mCenterY - mLineData.get(i).getDataY() * mScaleY;
             canvas.drawLine(startPointX, startPointY, stopPointX, stopPointY, mPaintLineData);
             canvas.drawCircle(startPointX, startPointY, mPointRadius, mPointPaint);
-            if ((i+1) == mDataTextX.size())
+            if ((i+1) == mLineData.size())
                 canvas.drawCircle(stopPointX, stopPointY, mPointRadius, mPointPaint);
         }
     }
@@ -466,7 +459,7 @@ public class PolyLineView extends View {
     }
 
     /**
-     * 设置顶部柱状图的数据
+     * 设置折线图的数据
      * @param topLineData
      */
     public void setLineData(List<DataPoint> topLineData) {
@@ -478,7 +471,7 @@ public class PolyLineView extends View {
     }
 
     /**
-     * 获取顶部柱状图数据的平均值
+     * 获取折线图数据的平均值
      * @return
      */
     public float getLineAverageValue() {
@@ -552,15 +545,15 @@ public class PolyLineView extends View {
     }
 
     /**
-     * 设置顶部柱状图的颜色
-     * @param mTopLineDataColor
+     * 设置折线图的颜色
+     * @param mLineDataColor
      */
-    public void setTopLineDataColor(int mTopLineDataColor) {
-        this.mTopLineDataColor = mTopLineDataColor;
+    public void setLineDataColor(int mLineDataColor) {
+        this.mLineDataColor = mLineDataColor;
     }
 
     /**
-     * 设置柱状图的宽度（顶部和底部宽度一致）
+     * 设置折线图的宽度
      * @param mLineWidth
      */
     public void setLineWidth(int mLineWidth) {
