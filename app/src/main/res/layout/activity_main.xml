@@ -3,14 +3,41 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="horizontal"
     tools:context=".MainActivity">
 
 
     <com.example.customizehistogramview.view.HistogramView
         android:id="@+id/histogram_view"
-        android:layout_width="wrap_content"
+        android:layout_width="700dp"
         android:layout_height="match_parent"
         tools:ignore="MissingConstraints" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="100dp"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/send_top_data"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textSize="25sp"
+            android:text="发送随机数据（上）"/>
+
+        <Button
+            android:id="@+id/send_bottom_data"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="25sp"
+            android:text="发送随机数据（下）"/>
+    </LinearLayout>
+
+
 
 
 </LinearLayout>

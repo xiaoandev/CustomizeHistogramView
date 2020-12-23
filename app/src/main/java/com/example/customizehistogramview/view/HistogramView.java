@@ -2,10 +2,13 @@ package com.example.customizehistogramview.view;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -205,6 +208,46 @@ public class HistogramView extends View {
      * 设置平均线的显示方式：1、实线；2、虚线。
      */
     private boolean isShowDottedLine = true;
+    /**
+     * X轴刻度数量
+     */
+    private int mValueNumX = 6;
+    /**
+     * Y轴刻度数量
+     */
+    private int mValueNumY = 6;
+    /**
+     * 是否重新绘制坐标轴刻度及文字
+     */
+    private boolean isReDrawText = true;
+    /**
+     * 是否重新绘制坐标轴
+     */
+    private boolean isReDrawLineXY = true;
+    /**
+     * 是否重新绘制顶部柱状图
+     */
+    private boolean isReDrawTopLineData = true;
+    /**
+     * 是否重新绘制底部柱状图
+     */
+    private boolean isReDrawBottomLineData = true;
+    /**
+     * 使用.9.png图片作为顶部柱状图的背景
+     */
+    private int topLineBitmap = R.drawable.ic_launcher;
+    /**
+     * 判断是否使用.9.png图片替换顶部柱状图的背景颜色
+     */
+    private boolean isReplaceTopLineByBitmap = false;
+    /**
+     * 使用.9.png图片作为底部柱状图的背景
+     */
+    private int bottomLineBitmap = R.drawable.ic_launcher;
+    /**
+     * 判断是否使用.9.png图片替换底部柱状图的背景颜色
+     */
+    private boolean isReplaceBottomLineByBitmap = false;
 
     public HistogramView(Context context) {
         super(context);
@@ -274,13 +317,16 @@ public class HistogramView extends View {
 
         mScaleX = mIntervalDataX / mValueMinusX;
         mScaleY = mIntervalDataY / mValueMinusY;
-        if (mTopLineData != null)
+
+        if (!mTopLineData.isEmpty())
             drawTopLineData(canvas);//绘制顶部柱状图
-        if (mBottomLineData != null)
+        if (!mBottomLineData.isEmpty())
             drawBottomLineData(canvas);//绘制底部柱状图
 
         drawAverageValueLine(canvas);
+
     }
+
 
     /**
      * 绘制坐标轴
@@ -321,14 +367,26 @@ public class HistogramView extends View {
     private void drawTopLineData(Canvas canvas) {
         mPaintLineData.setColor(mTopLineDataColor);
         mPaintLineData.setStrokeWidth(mLineWidth);
+        float left, top, right, bottom;
         float startLineX, stopLineX, stopLineY;
         float startLineY = mCenterY;
-        for (int i = 1; i <= mDataTextX.size(); i++) {
+        //从右往左绘制
+        for (int i = mValueNumX, j = 1; (i >= 1) && ((mTopLineData.size() - j) >= 0); i--, j++) {
             startLineX = mCenterX + i * mIntervalDataX;
             stopLineX = startLineX;
-            stopLineY = startLineY - mTopLineData.get(i-1).getDataY() * mScaleY;
-            Log.d("stopLineY", i + "--" + stopLineY);
-            canvas.drawLine(startLineX, startLineY, stopLineX, stopLineY, mPaintLineData);
+            stopLineY = startLineY - mTopLineData.get(mTopLineData.size() - j).getDataY() * mScaleY;
+            Log.d("stopLineY", i + "--" + mTopLineData.get(mTopLineData.size() - j).getDataY());
+
+            if (isReplaceTopLineByBitmap) {
+                left = startLineX - mLineWidth / 2;
+                top = stopLineY;
+                right = startLineX + mLineWidth / 2;
+                bottom = startLineY;
+                Bitmap bitmap = BitmapFactory.decodeResource(getResources(), topLineBitmap);
+                RectF rectF = new RectF(left, top, right, bottom);
+                canvas.drawBitmap(bitmap, null, rectF, mPaintTextXY);//限定图片显示范围
+            } else
+                canvas.drawLine(startLineX, startLineY, stopLineX, stopLineY, mPaintLineData);
         }
     }
 
@@ -339,14 +397,26 @@ public class HistogramView extends View {
     private void drawBottomLineData(Canvas canvas) {
         mPaintLineData.setColor(mBottomLineDataColor);
         mPaintLineData.setStrokeWidth(mLineWidth);
+        float left, top, right, bottom;
         float startLineX, stopLineX, stopLineY;
         float startLineY = mCenterY + textHeightX + 2 * marginDataX;
-        for (int i = 1; i <= mDataTextX.size(); i++) {
+        //从右往左绘制
+        for (int i = mValueNumX, j = 1; (i >= 1) && ((mBottomLineData.size() - j) >= 0); i--, j++) {
             startLineX = mCenterX + i * mIntervalDataX;
             stopLineX = startLineX;
-            stopLineY = startLineY + mBottomLineData.get(i-1).getDataY() * mScaleY;
-            Log.d("stopLineY", i + "--" + stopLineY);
-            canvas.drawLine(startLineX, startLineY, stopLineX, stopLineY, mPaintLineData);
+            stopLineY = startLineY + mBottomLineData.get(mBottomLineData.size() - j).getDataY() * mScaleY;
+            Log.d("stopLineY", i + "--" + mBottomLineData.get(mBottomLineData.size() - j).getDataY());
+
+            if (isReplaceBottomLineByBitmap) {
+                left = startLineX - mLineWidth / 2;
+                top = startLineY;
+                right = startLineX + mLineWidth / 2;
+                bottom = stopLineY;
+                Bitmap bitmap = BitmapFactory.decodeResource(getResources(), bottomLineBitmap);
+                RectF rectF = new RectF(left, top, right, bottom);
+                canvas.drawBitmap(bitmap, null, rectF, mPaintTextXY);//限定图片显示范围
+            } else
+                canvas.drawLine(startLineX, startLineY, stopLineX, stopLineY, mPaintLineData);
         }
     }
 
@@ -429,9 +499,11 @@ public class HistogramView extends View {
     public void setDigitalAxisData(int startValueX, int valueNumX, int startValueY, int valueNumY) {
         List<String> digitalValueX = new ArrayList<>();
         List<String> digitalValueY = new ArrayList<>();
-        for (int i = 0; i < valueNumX; i++)
+        mValueNumX = valueNumX;
+        mValueNumY = valueNumY;
+        for (int i = 0; i < mValueNumX; i++)
             digitalValueX.add(String.valueOf(startValueX + i * mValueMinusX));
-        for (int j= 0; j < valueNumY; j++)
+        for (int j= 0; j < mValueNumY; j++)
             digitalValueY.add(String.valueOf(startValueY + j * mValueMinusY));
         this.mDataTextX.clear();
         this.mDataTextY.clear();
@@ -453,17 +525,35 @@ public class HistogramView extends View {
     }
 
     /**
+     * 添加顶部柱状图的数据
+     * @param addTopLineData
+     */
+    public void addTopLineData(List<DataPoint> addTopLineData) {
+        if (addTopLineData == null)
+            return;
+        //合并新添加的数据
+        List<DataPoint> tempLineData = new ArrayList<>();
+        tempLineData.addAll(mTopLineData);
+        tempLineData.addAll(addTopLineData);
+        this.mTopLineData.clear();
+        this.mTopLineData = tempLineData;
+        invalidate();
+    }
+
+    /**
      * 获取顶部柱状图数据的平均值
      * @return
      */
     public float getTopAverageValue() {
-        float averageValue = 0;
+        float averageValue = 0, sum = 0;
         if (mTopLineData != null) {
             for (int i = 0; i < mTopLineData.size(); i++)
-                averageValue += mTopLineData.get(i).getDataY();
-            Log.d(TAG, "Top Data Sum----" + averageValue);
-            averageValue = averageValue / mTopLineData.size();
-            Log.d(TAG, "Top averageValue----" + averageValue);
+                sum += mTopLineData.get(i).getDataY();
+            Log.d(TAG, "Top Data Number----" + mTopLineData.size());
+            Log.d(TAG, "Top Data Sum----" + sum);
+            averageValue = sum / mTopLineData.size();
+            Log.d(TAG, "Top Data averageValue----" + averageValue);
+            Log.d(TAG, "Top Data -----------------------------------");
         }
         return averageValue;
     }
@@ -481,17 +571,37 @@ public class HistogramView extends View {
     }
 
     /**
+     * 添加顶部柱状图的数据
+     * @param addBottomLineData
+     */
+    public void addBottomLineData(List<DataPoint> addBottomLineData) {
+        if (addBottomLineData == null)
+            return;
+        List<DataPoint> tempLineData = new ArrayList<>();
+        tempLineData.addAll(mBottomLineData);
+        tempLineData.addAll(addBottomLineData);
+        Log.d(TAG, "mBottomLineData is " + mBottomLineData);
+        Log.d(TAG, "addBottomLineData is " + addBottomLineData);
+        Log.d(TAG, "tempLineData is " + tempLineData);
+        this.mBottomLineData.clear();
+        this.mBottomLineData = tempLineData;
+        invalidate();
+    }
+
+    /**
      * 获取底部柱状图数据的平均值
      * @return
      */
     public float getBottomAverageValue() {
-        float averageValue = 0;
+        float averageValue = 0, sum = 0;
         if (mBottomLineData != null) {
             for (int i = 0; i < mBottomLineData.size(); i++)
-                averageValue += mBottomLineData.get(i).getDataY();
-            Log.d(TAG, "Bottom Data Sum----" + averageValue);
-            averageValue = averageValue / mBottomLineData.size();
-            Log.d(TAG, "Bottom averageValue----" + averageValue);
+                sum += mBottomLineData.get(i).getDataY();
+            Log.d(TAG, "Bottom Data Number----" + mBottomLineData.size());
+            Log.d(TAG, "Bottom Data Sum----" + sum);
+            averageValue = sum / mBottomLineData.size();
+            Log.d(TAG, "Bottom Data averageValue----" + averageValue);
+            Log.d(TAG, "Bottom Data -----------------------------------");
         }
         return averageValue;
     }
@@ -722,5 +832,37 @@ public class HistogramView extends View {
      */
     public void setShowDottedLine(boolean showDottedLine) {
         isShowDottedLine = showDottedLine;
+    }
+
+    /**
+     * 设置顶部柱状图的背景
+     * @param topLineBitmap
+     */
+    public void setTopLineBitmap(int topLineBitmap) {
+        this.topLineBitmap = topLineBitmap;
+    }
+
+    /**
+     * 判断是否使用位图作为顶部柱状图的背景
+     * @param replaceTopLineByBitmap
+     */
+    public void setReplaceTopLineByBitmap(boolean replaceTopLineByBitmap) {
+        isReplaceTopLineByBitmap = replaceTopLineByBitmap;
+    }
+
+    /**
+     * 设置底部柱状图的背景
+     * @param bottomLineBitmap
+     */
+    public void setBottomLineBitmap(int bottomLineBitmap) {
+        this.bottomLineBitmap = bottomLineBitmap;
+    }
+
+    /**
+     * 判断是否使用位图作为底部柱状图的背景
+     * @param replaceBottomLineByBitmap
+     */
+    public void setReplaceBottomLineByBitmap(boolean replaceBottomLineByBitmap) {
+        isReplaceBottomLineByBitmap = replaceBottomLineByBitmap;
     }
 }
